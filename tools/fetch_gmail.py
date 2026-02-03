@@ -56,6 +56,11 @@ class GmailFetcher:
                     print("Please download credentials from Google Cloud Console (OAuth 2.0 Client ID) and save as 'client_secret.json' in the project root.")
                     return
 
+                # Check if we are running in interactive mode or if this is a headless server
+                if os.getenv("RENDER") or os.getenv("HEADLESS"):
+                    print("[ERROR] Cannot perform browser auth in headless environment. Please authenticate locally first.")
+                    return
+
                 print("[INFO] Starting Gmail OAuth Login Flow...")
                 flow = InstalledAppFlow.from_client_secrets_file(client_secrets_path, SCOPES)
                 self.creds = flow.run_local_server(port=0)

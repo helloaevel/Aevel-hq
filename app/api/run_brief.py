@@ -14,18 +14,7 @@ def get_google_creds(user_id: int, db: Session):
     if not token:
         return None
         
-    # Reconstruct Credentials object
-    # We need: token, refresh_token, token_uri, client_id, client_secret
-    # Ideally we'd have these all in DB or Config. For now we assume we can build minimal
-    
-    creds_data = {
-        "token": token.access_token,
-        "refresh_token": token.refresh_token,
-        "expiry":  None, # handled via refresh logic if needed, or raw string
-        # IMPORTANT: Google lib expects more fields to auto-refresh
-    }
-    
-    # We construct explicitly
+    # Reconstruct Credentials object from stored tokens
     try:
         from tools.utils.config import Config
         import os

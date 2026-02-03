@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: aevel-hq
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: NOTION_API_KEY
+        sync: false
+      - key: NOTION_TASK_DB_ID
+        sync: false
+      - key: NOTION_MEETING_DB_ID
+        sync: false
+      - key: SLACK_WEBHOOK_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: SECRET_KEY
+        sync: false

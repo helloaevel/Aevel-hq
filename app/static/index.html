@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aevel HQ | Executive OS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Palette: Deep Charcoal & Graphite */
+            --bg-body: #0f0f12;
+            --bg-sidebar: #12141a;
+            --bg-card: #181b21;
+            --bg-hover: #1d2027;
+
+            --text-primary: #e6e8eb;
+            --text-secondary: #8b9098;
+            --text-tertiary: #52525b;
+
+            --border: rgba(255, 255, 255, 0.04);
+            --border-hover: rgba(255, 255, 255, 0.08);
+
+            --accent-silver: #a1a1aa;
+            --accent-blue: #3b82f6;
+            /* Minimal usage */
+            --status-green: #10b981;
+            --status-orange: #f59e0b;
+            --status-red: #ef4444;
+
+            --font-main: 'Inter', -apple-system, sans-serif;
+            --radius: 8px;
+            --sidebar-width: 240px;
+            --sidebar-width-collapsed: 64px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            font-size: 14px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- Sidebar --- */
+        aside {
+            width: var(--sidebar-width-collapsed);
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 12px;
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 100;
+        }
+
+        aside:hover {
+            width: var(--sidebar-width);
+        }
+
+        .brand {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-left: 8px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .brand span {
+            margin-left: 12px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        aside:hover .brand span {
+            opacity: 1;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            color: var(--text-secondary);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+        }
+
+        nav button svg {
+            min-width: 20px;
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        nav button span {
+            margin-left: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        aside:hover nav button span {
+            opacity: 1;
+        }
+
+        nav button:hover {
+            background-color: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        nav button.active {
+            background-color: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        /* --- Sidebar Calendar --- */
+        .mini-calendar {
+            margin-top: auto;
+            /* Push to bottom */
+            padding: 20px 12px;
+            font-size: 12px;
+        }
+
+        .cal-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            text-align: center;
+        }
+
+        .cal-day-label {
+            color: var(--text-tertiary);
+            margin-bottom: 4px;
+            font-size: 10px;
+        }
+
+        .cal-day {
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            border-radius: 4px;
+            color: var(--text-secondary);
+            cursor: default;
+        }
+
+        .cal-day:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .cal-day.today {
+            background: var(--text-primary);
+            color: var(--bg-body);
+            font-weight: 600;
+        }
+
+        /* Auto-hide calendar when collapsed */
+        aside:not(:hover) .mini-calendar {
+            display: none;
+        }
+
+        /* --- Main Content --- */
+        main {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 32px 40px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            background: rgba(15, 15, 18, 0.8);
+            backdrop-filter: blur(8px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .header-meta {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--status-green);
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Action Button */
+        .btn-refresh {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-refresh:hover {
+            border-color: var(--text-secondary);
+            background: var(--bg-hover);
+        }
+
+        .btn-refresh:disabled {
+            opacity: 0.5;
+            cursor: wait;
+        }
+
+        /* --- Dashboard Grid --- */
+        .dashboard-grid {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+        }
+
+        /* Specific Panels */
+        #summary-chips {
+            grid-column: span 12;
+            display: flex;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .chip {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chip strong {
+            color: var(--text-primary);
+        }
+
+        #panel-tasks {
+            grid-column: span 7;
+        }
+
+        #panel-schedule {
+            grid-column: span 5;
+        }
+
+        #panel-intelligence {
+            grid-column: span 12;
+        }
+
+        #panel-signals {
+            grid-column: span 12;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        /* Lists */
+        .list-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+
+        .list-row:last-child {
+            border-bottom: none;
+        }
+
+        .rank-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 16px;
+            width: 32px;
+            text-align: center;
+        }
+
+        .row-content {
+            flex: 1;
+        }
+
+        .row-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .row-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 12px;
+        }
+
+        .tag {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+        }
+
+        .tag.high {
+            color: var(--status-orange);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .tag.urgent {
+            color: var(--status-red);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Calendar Items */
+        .cal-item {
+            display: flex;
+            gap: 16px;
+            padding: 12px 0;
+            border-left: 2px solid var(--border);
+            padding-left: 16px;
+            margin-left: 8px;
+            position: relative;
+        }
+
+        .cal-item.active {
+            border-color: var(--text-primary);
+        }
+
+        .cal-item.conflict {
+            border-color: var(--status-red);
+        }
+
+        .cal-time {
+            font-feature-settings: "tnum";
+            color: var(--text-secondary);
+            font-size: 13px;
+            width: 48px;
+        }
+
+        /* Intelligence Cards */
+        .insight-card {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .insight-header {
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .insight-actions li {
+            list-style: none;
+            display: flex;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .insight-actions li::before {
+            content: "•";
+            color: var(--text-tertiary);
+        }
+
+        /* Tab System (Visibility Toggles) */
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: grid;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside>
+        <div class="brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                <path d="M12 2L2 22h20L12 2zm0 3l8 15H4l8-15z" />
+            </svg>
+            <span>Aevel HQ</span>
+        </div>
+        <nav>
+            <button class="active" onclick="switchTab('overview')">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Overview</span>
+            </button>
+            <button onclick="switchTab('tasks')">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-5-5 1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z" />
+                </svg>
+                <span>Tasks</span>
+            </button>
+            <button onclick="switchTab('meetings')">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" />
+                </svg>
+                <span>Meetings</span>
+            </button>
+        </nav>
+
+        <!-- User Profile -->
+        <div id="user-profile"
+            style="padding: 12px; margin-bottom:12px; display:none; align-items: center; gap: 12px; border-top: 1px solid var(--border); padding-top: 16px;">
+            <img id="user-avatar" src=""
+                style="width: 32px; height: 32px; border-radius: 50%; background: var(--bg-card);">
+            <div style="overflow: hidden;">
+                <div id="user-name"
+                    style="font-size: 13px; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                    User</div>
+                <a href="/auth/logout"
+                    style="font-size: 11px; color: var(--text-secondary); text-decoration: none;">Sign Out</a>
+            </div>
+        </div>
+
+        <div class="mini-calendar">
+            <div class="cal-header">
+                <span id="cal-month">February 2026</span>
+            </div>
+            <div class="cal-grid" id="cal-days">
+                <div class="cal-day-label">S</div>
+                <div class="cal-day-label">M</div>
+                <div class="cal-day-label">T</div>
+                <div class="cal-day-label">W</div>
+                <div class="cal-day-label">T</div>
+                <div class="cal-day-label">F</div>
+                <div class="cal-day-label">S</div>
+                <!-- JS populates -->
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main>
+        <header>
+            <div>
+                <h1 class="header-title" id="page-title">Today's Executive Brief</h1>
+                <div class="header-meta">
+                    <div class="status-dot"></div>
+                    <span id="last-updated">System Online</span>
+                </div>
+            </div>
+            <button class="btn-refresh" id="refreshBtn" onclick="runBrief()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 4v6h-6M1 20v-6h6"></path>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+                Refresh Data
+            </button>
+        </header>
+
+        <!-- VIEW: OVERVIEW -->
+        <div id="view-overview" class="view-section active dashboard-grid">
+
+            <!-- Summary Chips -->
+            <div id="summary-chips">
+                <!-- Javascript populates -->
+            </div>
+
+            <!-- Task Intelligence -->
+            <div class="panel" id="panel-tasks">
+                <div class="panel-header">
+                    <span class="panel-title">Work Order</span>
+                </div>
+                <div id="task-list-container">
+                    <div style="padding:20px; color:var(--text-secondary);">Initializing...</div>
+                </div>
+            </div>
+
+            <!-- Calendar -->
+            <div class="panel" id="panel-schedule">
+                <div class="panel-header">
+                    <span class="panel-title">Today's Schedule</span>
+                </div>
+                <div id="schedule-container">
+                    <!-- Javascript populates -->
+                </div>
+            </div>
+
+            <!-- Meeting Intelligence -->
+            <div class="panel" id="panel-intelligence">
+                <div class="panel-header">
+                    <span class="panel-title">Meeting Intelligence</span>
+                </div>
+                <div id="intelligence-container">
+                    <!-- Javascript populates -->
+                </div>
+            </div>
+
+            <!-- Signals/Alerts -->
+            <div class="panel" id="panel-signals" style="background:transparent; border:none; padding:0;">
+                <!-- Signals populated here -->
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        // --- Core Logic ---
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('/auth/me');
+                if (!res.ok) throw new Error("Unauthorized");
+
+                const user = await res.json();
+                if (!user) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                // Update Sidebar
+                document.getElementById('user-profile').style.display = 'flex';
+                document.getElementById('user-name').innerText = user.name || user.email;
+                if (user.avatar_url) document.getElementById('user-avatar').src = user.avatar_url;
+
+            } catch (e) {
+                // Redirect if not logged in
+                console.log("Not logged in:", e);
+                window.location.href = '/login.html';
+            }
+        }
+        checkAuth(); // Verify session on load
+
+        async function runBrief() {
+            const btn = document.getElementById('refreshBtn');
+            const status = document.getElementById('last-updated');
+
+            btn.innerHTML = `Running...`;
+            btn.disabled = true;
+            status.innerHTML = "Processing...";
+
+            try {
+                const response = await fetch('/api/run-brief', { method: 'POST' });
+                const data = await response.json();
+
+                renderOverview(data);
+
+                const now = new Date();
+                status.innerHTML = `Updated ${now.toLocaleTimeString()}`;
+                btn.innerHTML = `Refresh Data`;
+
+            } catch (err) {
+                console.error(err);
+                status.innerHTML = "Connection Failed";
+                status.style.color = "var(--status-red)";
+                btn.innerHTML = "Retry";
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function renderOverview(data) {
+            // 1. Summary Chips
+            const chips = document.getElementById('summary-chips');
+            chips.innerHTML = `
+                <div class="chip"><strong>${data.summary.task_count}</strong> Open Tasks</div>
+                <div class="chip"><strong>${data.summary.meeting_count}</strong> Events</div>
+                <div class="chip" style="${data.summary.urgent_email_count > 0 ? 'border-color:var(--status-orange); color:var(--status-orange);' : ''}">
+                    <strong>${data.summary.urgent_email_count}</strong> Alerts
+                </div>
+            `;
+
+            // 2. Tasks (Work Order)
+            const taskContainer = document.getElementById('task-list-container');
+            taskContainer.innerHTML = "";
+            (data.priorities || []).slice(0, 5).forEach(t => {
+                const div = document.createElement('div');
+                div.className = 'list-row';
+
+                const isHigh = t.priority === 'High';
+
+                div.innerHTML = `
+                    <div class="rank-score" style="color:${isHigh ? 'var(--status-orange)' : 'inherit'}">${t.score || 0}</div>
+                    <div class="row-content">
+                        <div class="row-title">${t.title}</div>
+                        <div class="row-meta">
+                            <span>${t.status}</span>
+                            <span>${t.due_date || ''}</span>
+                        </div>
+                    </div>
+                    ${isHigh ? '<span class="tag high">High Priority</span>' : ''}
+                `;
+                taskContainer.appendChild(div);
+            });
+            if (!data.priorities || data.priorities.length === 0) {
+                taskContainer.innerHTML = "<div style='padding:20px; color:var(--text-secondary); text-align:center;'>No high priority tasks.</div>";
+            }
+
+            // 3. Schedule
+            const calContainer = document.getElementById('schedule-container');
+            calContainer.innerHTML = "";
+            const events = data.schedule?.events || [];
+
+            events.forEach(e => {
+                const div = document.createElement('div');
+                div.className = 'cal-item';
+
+                // Parse time
+                const d = new Date(e.start.replace('Z', ''));
+                const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                div.innerHTML = `
+                    <div class="cal-time">${time}</div>
+                    <div class="cal-content">
+                        <div style="font-weight:500;">${e.summary}</div>
+                        ${e.tags?.includes('High Priority') ? '<div style="font-size:11px; color:var(--status-orange); margin-top:2px;">⭐ High Priority</div>' : ''}
+                    </div>
+                `;
+                calContainer.appendChild(div);
+            });
+            if (events.length === 0) {
+                calContainer.innerHTML = "<div style='padding:20px; color:var(--text-secondary); text-align:center; font-style:italic;'>No events found for today.</div>";
+            }
+
+            // 4. Intelligence
+            const intContainer = document.getElementById('intelligence-container');
+            intContainer.innerHTML = "";
+            const insights = data.meeting_insights || [];
+
+            insights.forEach(i => {
+                const div = document.createElement('div');
+                div.className = 'insight-card';
+
+                const actions = i.analysis.action_items || [];
+                const decisions = i.analysis.decisions || [];
+
+                div.innerHTML = `
+                    <div class="insight-header">
+                        <span>${i.meta.title}</span>
+                        <span style="font-size:12px; color:var(--text-secondary);">${i.meta.date}</span>
+                    </div>
+                    <ul class="insight-actions">
+                        ${decisions.map(d => `<li><strong>Decision:</strong> ${d}</li>`).join('')}
+                        ${actions.map(a => `<li><strong>Action:</strong> ${a}</li>`).join('')}
+                    </ul>
+                `;
+                intContainer.appendChild(div);
+            });
+            if (insights.length === 0) intContainer.innerHTML = "<div style='color:var(--text-secondary); padding:10px;'>No new insights processed.</div>";
+
+            // 5. Signals
+            const signals = document.getElementById('panel-signals');
+            signals.innerHTML = "";
+            if (data.flagged_emails && data.flagged_emails.length > 0) {
+                const alertDiv = document.createElement('div');
+                alertDiv.style.cssText = "background:rgba(239, 68, 68, 0.1); border:1px solid var(--status-red); border-radius:12px; padding:16px; width:100%; display:flex; gap:16px; align-items:center;";
+                alertDiv.innerHTML = `
+                    <div style="color:var(--status-red); font-weight:600;">Sensitive Alerts</div>
+                    <div style="color:var(--text-primary);">${data.flagged_emails.length} urgent emails found.</div>
+                `;
+                signals.appendChild(alertDiv);
+            }
+        }
+
+        function switchTab(tabName) {
+            // Simple tab switching logic for future expansion
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // For now, only Overview is active
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + tabName).classList.add('active');
+        }
+
+        // Auto-run on load? Maybe manual is better for "Control" feel.
+        // runBrief(); 
+
+        // Render Mini Calendar
+        function renderCalendar() {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = date.getMonth();
+
+            // Update Header (e.g., "February 2026")
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById('cal-month').innerText = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDay = firstDay.getDay(); // 0 = Sunday
+
+            const grid = document.getElementById('cal-days');
+            // Keep labels
+            grid.innerHTML = '<div class="cal-day-label">S</div><div class="cal-day-label">M</div><div class="cal-day-label">T</div><div class="cal-day-label">W</div><div class="cal-day-label">T</div><div class="cal-day-label">F</div><div class="cal-day-label">S</div>';
+
+            // Empty slots for previous month
+            for (let i = 0; i < startingDay; i++) {
+                grid.innerHTML += '<div></div>';
+            }
+
+            // Days
+            const today = date.getDate();
+            for (let i = 1; i <= daysInMonth; i++) {
+                const isToday = i === today;
+                grid.innerHTML += `<div class="cal-day ${isToday ? 'today' : ''}">${i}</div>`;
+            }
+        }
+        renderCalendar();
+    </script>
+</body>
+
+</html>
